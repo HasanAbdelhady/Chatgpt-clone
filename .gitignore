@@ -3,5 +3,4 @@
 db.sqlite3
 __pycache__
 venv
-media/chat_uploads
-media/profile_images
+media
