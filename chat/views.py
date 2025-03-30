@@ -99,26 +99,41 @@ class ChatStreamView(View):
             uploaded_file = request.FILES.get('file')
 
             # Process file if present
-            file_info, _ = chat_service.process_file(uploaded_file)
+            file_info, file_content = chat_service.process_file(uploaded_file)
+            
+            # Create user message - only show file name if file was uploaded
+            user_message = prompt_text
             if uploaded_file:
                 chat_service.save_file(chat.id, uploaded_file)
+                file_indicator = f"\n[Uploaded file: {uploaded_file.name}]"
+                user_message += file_indicator
+            
+            chat_service.create_message(chat, 'user', user_message)
 
-            # Combine prompt with file info
-            full_prompt = prompt_text + (file_info if file_info else "")
-
-            # Create user message
-            chat_service.create_message(chat, 'user', full_prompt)
+            # For the LLM, combine prompt with actual file content
+            full_prompt = prompt_text
+            if file_content:
+                full_prompt += f"\n\nFile content:\n{file_content}"
 
             # Update chat title if needed
             if chat.title == "New Chat" and prompt_text:
                 chat_service.update_chat_title(chat, prompt_text)
 
-            # Get system prompt and prepare messages
+            # Get system prompt and prepare messages for LLM
             system_prompt = request.session.get('system_prompt', SYSTEM_PROMPT)
             messages = [{"role": "system", "content": system_prompt}]
             chat_history = chat_service.get_chat_history(chat)
-            messages.extend([{"role": msg.role, "content": msg.content}
-                            for msg in chat_history])
+            messages.extend([{
+                "role": msg.role, 
+                "content": msg.content
+            } for msg in chat_history[:-1]])  # Exclude the last message
+            
+            # Add the last message with full content for LLM
+            messages.append({
+                "role": "user",
+                "content": full_prompt
+            })
+
             # Stream response
             return self.stream_response(chat, messages)
 

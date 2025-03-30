@@ -4,31 +4,37 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>AI Chat Interface</title>
-		<!-- CDNs -->
 		<script src="https://cdn.tailwindcss.com"></script>
-		<script>
-			tailwind.config = { darkMode: "class" };
-		</script>
+		<link
+			href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
 		<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
 		<link
 			rel="stylesheet"
 			href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css"
 		/>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
 		<style>
-			/* Essential styles */
-			.delete-chat-btn {
-				opacity: 0;
-				transition: all 0.2s ease-in-out;
-			}
-			.group:hover .delete-chat-btn {
-				opacity: 1;
+			.cyberpunk-gradient {
+				background: linear-gradient(
+					125deg,
+					#00072d 0%,
+					#001440 28.65%,
+					#001233 75.52%
+				);
 			}
 
-			/* Message styling */
-			.message-enter {
-				animation: messageEnter 0.2s ease-out;
+			.glass-effect {
+				backdrop-filter: blur(12px);
+				background: rgba(17, 25, 40, 0.75);
+				border: 1px solid rgba(255, 255, 255, 0.1);
 			}
+
+			.message-enter {
+				animation: messageEnter 0.3s ease-out;
+			}
+
 			@keyframes messageEnter {
 				from {
 					opacity: 0;
@@ -40,94 +46,123 @@
 				}
 			}
 
-			/* Code blocks */
-			.markdown-content pre {
-				margin: 1em 0;
-				border-radius: 0.25rem;
-				overflow: auto;
+			.input-glow:focus {
+				box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
 			}
+
+			.button-glow:hover {
+				box-shadow: 0 0 25px rgba(37, 99, 235, 0.5);
+			}
+
+			/* Improved markdown content styling */
+			.markdown-content {
+				@apply text-gray-100;
+			}
+
+			.markdown-content > *:first-child {
+				margin-top: 0 !important;
+			}
+
+			.markdown-content > *:last-child {
+				margin-bottom: 0 !important;
+			}
+
+			.markdown-content p {
+				margin: 0.75em 0;
+				line-height: 1.7;
+				white-space: pre-wrap;
+			}
+
+			.markdown-content:not(:has(p, pre, ul, ol, blockquote)) {
+				white-space: pre-wrap;
+			}
+
+			.markdown-content pre {
+				position: relative;
+				margin: 1em 0;
+				padding: 1em;
+				border-radius: 0.5rem;
+				background: rgba(30, 41, 59, 0.75) !important;
+				border: 1px solid rgba(255, 255, 255, 0.1);
+				overflow-x: auto;
+			}
+
+			.markdown-content pre .copy-button {
+				position: absolute;
+				top: 0.5rem;
+				right: 0.5rem;
+				padding: 0.25rem 0.5rem;
+				font-size: 0.75rem;
+				color: #94a3b8;
+				background: rgba(30, 41, 59, 0.9);
+				border: 1px solid rgba(255, 255, 255, 0.1);
+				border-radius: 0.25rem;
+				opacity: 0;
+				transition: opacity 0.2s, color 0.2s;
+			}
+
+			.markdown-content pre:hover .copy-button {
+				opacity: 1;
+			}
+
+			.markdown-content pre .copy-button:hover {
+				color: #e2e8f0;
+			}
+
+			.markdown-content pre .copy-button.copied {
+				color: #4ade80;
+			}
+
 			.markdown-content code {
-				font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-					monospace;
-				font-size: 0.875rem;
+				font-family: "Space Mono", monospace;
+				font-size: 0.9em;
 				padding: 0.2em 0.4em;
 				border-radius: 0.25rem;
-				background-color: rgba(88, 88, 88, 0.15);
 			}
-			.markdown-content pre code {
+
+			.markdown-content:not(pre) > code {
+				background: rgba(30, 41, 59, 0.5);
+			}
+
+			.markdown-content pre > code {
 				padding: 0;
-				background-color: transparent;
+				background: transparent;
+				white-space: pre;
+			}
+			.copy-btn {
+				transition: all 0.2s;
+			}
+
+			.copy-btn.copied {
+				color: #4ade80;
 			}
 
 			/* Typing indicator */
-			.typing-indicator {
-				display: inline-flex;
-				align-items: center;
-			}
 			.typing-indicator span {
 				height: 4px;
 				width: 4px;
 				margin: 0 1px;
-				background-color: #acacbe;
+				background: #60a5fa;
 				border-radius: 50%;
 				display: inline-block;
-				animation: pulse 1.5s infinite ease-in-out both;
+				animation: typing 1.5s infinite ease-in-out;
 			}
-			.typing-indicator span:nth-child(1) {
-				animation-delay: -0.3s;
-			}
-			.typing-indicator span:nth-child(2) {
-				animation-delay: -0.15s;
-			}
-			@keyframes pulse {
+
+			@keyframes typing {
 				0%,
 				80%,
 				100% {
 					transform: scale(0.8);
-					opacity: 0.6;
+					opacity: 0.5;
 				}
 				40% {
 					transform: scale(1);
 					opacity: 1;
 				}
 			}
-
-			/* Scrollbar */
-			::-webkit-scrollbar {
-				width: 6px;
-				height: 6px;
-			}
-			::-webkit-scrollbar-track {
-				background: transparent;
-			}
-			::-webkit-scrollbar-thumb {
-				background: #565869;
-				border-radius: 6px;
-			}
-			::-webkit-scrollbar-thumb:hover {
-				background: #7e7e90;
-			}
-
-			/* Input field */
-			.chat-input {
-				background-color: rgba(64, 65, 79, 0.9);
-				border: 1px solid rgba(86, 88, 105, 1);
-				transition: all 0.2s ease;
-			}
-			.chat-input:focus {
-				border-color: rgba(142, 142, 160, 1);
-				box-shadow: 0 0 0 1px rgba(142, 142, 160, 0.5);
-			}
-			.rename-chat-btn {
-				opacity: 0;
-				transition: all 0.2s ease-in-out;
-			}
-			.group:hover .rename-chat-btn {
-				opacity: 1;
-			}
 		</style>
 	</head>
-	<body class="bg-[#343541] text-gray-100">
+	<body class="cyberpunk-gradient font-space text-gray-100 min-h-screen">
 		<!-- Sidebar toggle -->
 		<button
 			id="sidebar-toggle"
@@ -312,7 +347,7 @@
 										/>
 									</svg>
 								</a>
-								<form method="POST" action="{% url 'logout' %}" class="inline">
+								<form method="post" action="{% url 'logout' %}" class="inline">
 									{% csrf_token %}
 									<button
 										type="submit"
@@ -367,7 +402,7 @@
 				>
 					{% for msg in conversation %}
 					<div
-						class="message-enter {% if msg.role == 'assistant' %}bg-[#444654]{% else %}{% endif %} px-4 md:px-6 py-6"
+						class="message-enter {% if msg.role == 'user' %}bg-slate-700{% else %}{% endif %} px-4 md:px-6 py-6"
 					>
 						<div class="chat-container flex gap-4 md:gap-6">
 							<!-- User or Assistant icon -->
@@ -443,27 +478,6 @@
 
 				<!-- Input area -->
 				<div class="relative border-t border-gray-700/50 pt-4 mt-auto">
-					<!-- Control buttons -->
-					<div class="flex justify-between">
-						<button
-							id="clear-chat"
-							class="text-xs text-gray-400 hover:text-gray-200 transition-colors mb-2 ml-1 flex items-center"
-						>
-							<svg
-								class="w-3 h-3 mr-1"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-								/>
-							</svg>
-							Clear chat
-						</button>
 						<button
 							id="stop-button"
 							class="hidden text-xs text-gray-400 hover:text-red-400 transition-colors mb-2 mr-1"
@@ -483,7 +497,7 @@
 								name="prompt"
 								rows="1"
 								placeholder="Message the AI..."
-								class="chat-input w-full py-3 pl-4 pr-12 text-gray-100 rounded-md focus:outline-none resize-none max-h-48"
+								class="chat-input w-full py-3 pl-4 pr-12 text-black rounded-md focus:outline-none resize-none max-h-48"
 							></textarea>
 
 							<div class="absolute right-2 bottom-2.5 flex">
@@ -568,87 +582,90 @@
 		</div>
 
 		<script>
-						// Define the current chat ID
-						let currentChatId = "{% if current_chat.id %}{{ current_chat.id }}{% else %}new{% endif %}";
-						let abortController = null;
-						let isNewChat = {% if is_new_chat %}true{% else %}false{% endif %};
+			// Define the current chat ID
+			let currentChatId = "{% if current_chat.id %}{{ current_chat.id }}{% else %}new{% endif %}";
+			let abortController = null;
+			let isNewChat = {% if is_new_chat %}true{% else %}false{% endif %};
 
-						// DOM elements
-						const form = document.getElementById("chat-form");
-						const textarea = document.getElementById("prompt");
-						const stopButton = document.getElementById("stop-button");
-						const fileInput = document.getElementById("file-input");
-						const fileNameIndicator = document.getElementById("file-name");
-						const clearFileButton = document.getElementById("clear-file");
-						const sidebarToggle = document.getElementById("sidebar-toggle");
-						const sidebar = document.getElementById("sidebar");
-						const mainContent = document.getElementById("main-content");
+			// DOM elements
+			const form = document.getElementById("chat-form");
+			const textarea = document.getElementById("prompt");
+			const stopButton = document.getElementById("stop-button");
+			const fileInput = document.getElementById("file-input");
+			const fileNameIndicator = document.getElementById("file-name");
+			const clearFileButton = document.getElementById("clear-file");
+			const sidebarToggle = document.getElementById("sidebar-toggle");
+			const sidebar = document.getElementById("sidebar");
+			const mainContent = document.getElementById("main-content");
 
-						// Sidebar toggle
-						let sidebarOpen = false;
+			// Sidebar toggle
+			let sidebarOpen = false;
 
-						// Sidebar toggle button
-						sidebarToggle.addEventListener("click", (e) => {
-							e.stopPropagation();
-							openSidebar();
-						});
+			// Sidebar toggle button
+			sidebarToggle.addEventListener("click", (e) => {
+				e.stopPropagation();
+				openSidebar();
+			});
 
-						// Close sidebar button
-						document.getElementById("close-sidebar").addEventListener("click", (e) => {
-							e.stopPropagation();
-							closeSidebar();
-						});
+			// Close sidebar button
+			document
+				.getElementById("close-sidebar")
+				.addEventListener("click", (e) => {
+					e.stopPropagation();
+					closeSidebar();
+				});
 
-						// Functions to handle sidebar state
-						function openSidebar() {
-							sidebarOpen = true;
-							sidebar.classList.remove("-translate-x-full");
-							mainContent.classList.add("pl-64");
-						}
+			// Functions to handle sidebar state
+			function openSidebar() {
+				sidebarOpen = true;
+				sidebar.classList.remove("-translate-x-full");
+				mainContent.classList.add("pl-64");
+			}
 
-						function closeSidebar() {
-							sidebarOpen = false;
-							sidebar.classList.add("-translate-x-full");
-							mainContent.classList.remove("pl-64");
-						}
+			function closeSidebar() {
+				sidebarOpen = false;
+				sidebar.classList.add("-translate-x-full");
+				mainContent.classList.remove("pl-64");
+			}
 
-						// Remove the old click outside listener and replace with this
-						document.addEventListener("click", (e) => {
-							const clickedSidebar = sidebar.contains(e.target);
-							const clickedToggle = sidebarToggle.contains(e.target);
+			// Remove the old click outside listener and replace with this
+			document.addEventListener("click", (e) => {
+				const clickedSidebar = sidebar.contains(e.target);
+				const clickedToggle = sidebarToggle.contains(e.target);
 
-							// Only close if clicking outside both sidebar and toggle button
-							if (sidebarOpen && !clickedSidebar && !clickedToggle) {
-								closeSidebar();
-							}
-						});
+				// Only close if clicking outside both sidebar and toggle button
+				if (sidebarOpen && !clickedSidebar && !clickedToggle) {
+					closeSidebar();
+				}
+			});
 
-						// Auto-resize textarea
-						function adjustTextareaHeight() {
-							textarea.style.height = 'auto';
-							textarea.style.height = (textarea.scrollHeight < 200 ? textarea.scrollHeight : 200) + 'px';
-						}
+			// Auto-resize textarea
+			function adjustTextareaHeight() {
+				textarea.style.height = "auto";
+				textarea.style.height =
+					textarea.scrollHeight < 200 ? textarea.scrollHeight : 200 + "px";
+			}
 
-						textarea.addEventListener("input", adjustTextareaHeight);
-						textarea.addEventListener("focus", adjustTextareaHeight);
+			textarea.addEventListener("input", adjustTextareaHeight);
+			textarea.addEventListener("focus", adjustTextareaHeight);
 
-						// Submit form on Enter (without Shift)
-						textarea.addEventListener("keydown", function(e) {
-							if (e.key === "Enter" && !e.shiftKey) {
-								e.preventDefault();
-								form.dispatchEvent(new Event("submit"));
-							}
-						});
+			// Submit form on Enter (without Shift)
+			textarea.addEventListener("keydown", function (e) {
+				if (e.key === "Enter" && !e.shiftKey) {
+					e.preventDefault();
+					form.dispatchEvent(new Event("submit"));
+				}
+			});
 
-						// Typing indicator
-						function createTypingIndicator() {
-							removeTypingIndicator();
+			// Typing indicator
+			function createTypingIndicator() {
+				removeTypingIndicator();
 
-							const typingDiv = document.createElement('div');
-							typingDiv.className = 'message-enter bg-[#444654] px-4 md:px-6 py-6';
-							typingDiv.id = 'typing-indicator';
+				const typingDiv = document.createElement("div");
+				typingDiv.className = "message-enter px-4 md:px-6 py-6";
+				typingDiv.id = "typing-indicator";
 
-							typingDiv.innerHTML = `
+				typingDiv.innerHTML = `
 								<div class="chat-container flex gap-4 md:gap-6">
 									<div class="flex-shrink-0 w-7 h-7">
 										<div class="w-7 h-7 rounded-sm bg-[#11A27F] flex items-center justify-center text-white">
@@ -667,98 +684,121 @@
 								</div>
 							`;
 
-							document.getElementById("chat-messages").appendChild(typingDiv);
-							smoothScrollToBottom();
-						}
+				document.getElementById("chat-messages").appendChild(typingDiv);
+				smoothScrollToBottom();
+			}
 
-						function removeTypingIndicator() {
-							const typingIndicator = document.getElementById('typing-indicator');
-							if (typingIndicator) {
-								typingIndicator.remove();
-							}
-						}
+			function removeTypingIndicator() {
+				const typingIndicator = document.getElementById("typing-indicator");
+				if (typingIndicator) {
+					typingIndicator.remove();
+				}
+			}
 
-						// Smooth scroll
-						function smoothScrollToBottom() {
-							window.scrollTo({
-								top: document.body.scrollHeight,
-								behavior: 'smooth'
-							});
-						}
+			// Smooth scroll
+			function smoothScrollToBottom() {
+				window.scrollTo({
+					top: document.body.scrollHeight,
+					behavior: "smooth",
+				});
+			}
 
-						// File handling
-						function clearFileSelection() {
-							fileInput.value = "";
-							fileNameIndicator.textContent = "";
-							clearFileButton.classList.add("hidden");
-						}
+			// File handling
+			function clearFileSelection() {
+				fileInput.value = "";
+				fileNameIndicator.textContent = "";
+				clearFileButton.classList.add("hidden");
+			}
 
-						fileInput.addEventListener("change", () => {
-							const file = fileInput.files[0];
-							if (file) {
-								fileNameIndicator.textContent = `Attached: ${file.name}`;
-								clearFileButton.classList.remove("hidden");
-							} else {
-								clearFileSelection();
-							}
-						});
+			fileInput.addEventListener("change", () => {
+				const file = fileInput.files[0];
+				if (file) {
+					fileNameIndicator.textContent = `Attached: ${file.name}`;
+					clearFileButton.classList.remove("hidden");
+				} else {
+					clearFileSelection();
+				}
+			});
 
-						clearFileButton.addEventListener("click", clearFileSelection);
+			clearFileButton.addEventListener("click", clearFileSelection);
 
-						// Append message
-						function appendMessage(role, content) {
-							const messagesDiv = document.getElementById("chat-messages");
+			// Append message
+			function appendMessage(role, content) {
+				const messagesDiv = document.getElementById("chat-messages");
 
-							// Remove empty placeholder if present
-							const placeholder = messagesDiv.querySelector('.flex.flex-col.items-center.justify-center');
-							if (placeholder) placeholder.remove();
+				// Remove empty placeholder if present
+				const placeholder = messagesDiv.querySelector(
+					".flex.flex-col.items-center.justify-center"
+				);
+				if (placeholder) placeholder.remove();
 
-							const messageDiv = document.createElement("div");
-							messageDiv.className = `message-enter ${role === 'assistant' ? 'bg-[#444654]' : ''} px-4 md:px-6 py-6`;
+				const messageDiv = document.createElement("div");
+				messageDiv.className = `message-enter ${
+					role === "user" ? "bg-[#444654]" : ""
+				} px-4 md:px-6 py-6`;
 
-							messageDiv.innerHTML = `
+				messageDiv.innerHTML = `
 								<div class="flex gap-4 md:gap-6 max-w-3xl mx-auto">
 									<div class="flex-shrink-0 w-7 h-7">
-										${role === 'user'
-											? `<div class="w-7 h-7 rounded-sm bg-[#5436DA] flex items-center justify-center text-white text-xs font-semibold">U</div>`
-											: `<div class="w-7 h-7 rounded-sm bg-[#11A27F] flex items-center justify-center text-white">
+										${
+											role === "user"
+												? `<div class="w-7 h-7 rounded-sm bg-[#5436DA] flex items-center justify-center text-white text-xs font-semibold">U</div>`
+												: `<div class="w-7 h-7 rounded-sm bg-[#11A27F] flex items-center justify-center text-white">
 													<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5">
 														<path d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-10.5V21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
 													</svg>
 												</div>`
 										}
 									</div>
-									<div class="flex-1 overflow-x-auto min-w-0 ${role === 'assistant' ? 'markdown-content prose prose-invert max-w-none' : ''}">
-										${role === 'assistant' ? '' : `<p class="whitespace-pre-wrap">${content}</p>`}
+									<div class="flex-1 overflow-x-auto min-w-0 ${
+										role === "assistant"
+											? "markdown-content prose prose-invert max-w-none"
+											: ""
+									}">
+										${
+											role === "assistant"
+												? ""
+												: `<p class="whitespace-pre-wrap">${content}</p>`
+										}
 									</div>
 								</div>
 							`;
 
-							messagesDiv.appendChild(messageDiv);
-							smoothScrollToBottom();
+				messagesDiv.appendChild(messageDiv);
+				smoothScrollToBottom();
 
-							return role === 'assistant' ? messageDiv.querySelector('.markdown-content') : null;
-						}
+				return role === "assistant"
+					? messageDiv.querySelector(".markdown-content")
+					: null;
+			}
 
-						// Update assistant message content
-						function updateAssistantMessage(container, content) {
-							if (container) {
-								container.innerHTML = marked.parse(content);
-								container.querySelectorAll('pre code').forEach((block) => {
-									hljs.highlightElement(block);
-								});
-								smoothScrollToBottom();
-							}
-						}
+			// Update assistant message content
+			function updateAssistantMessage(container, content) {
+				if (container) {
+						// Format the content with proper spacing
+						const formattedContent = content
+							.replace(/\n\s*\n/g, '\n\n')
+							.trim();
 
-						// Function to handle streaming response
-						async function handleStreamResponse(response) {
-							if (!response.ok) throw new Error('Failed to get response');
-							removeTypingIndicator();
+						container.innerHTML = marked.parse(formattedContent);
 
-							const messageDiv = document.createElement('div');
-							messageDiv.className = 'message-enter bg-[#444654] px-4 md:px-6 py-6';
-							messageDiv.innerHTML = `
+						// Add copy buttons to all code blocks
+						container.querySelectorAll('pre code').forEach((block) => {
+							hljs.highlightElement(block);
+						});
+
+						smoothScrollToBottom();
+					}
+			}
+
+			// Function to handle streaming response
+			async function handleStreamResponse(response) {
+				if (!response.ok) throw new Error("Failed to get response");
+				removeTypingIndicator();
+
+				const messageDiv = document.createElement("div");
+				messageDiv.className = "message-enter  px-4 md:px-6 py-6";
+				messageDiv.innerHTML = `
 								<div class="flex gap-4 md:gap-6">
 									<div class="flex-shrink-0 w-7 h-7">
 										<div class="w-7 h-7 rounded-sm bg-[#11A27F] flex items-center justify-center text-white">
@@ -773,79 +813,90 @@
 								</div>
 							`;
 
-							document.getElementById('chat-messages').appendChild(messageDiv);
-							const markdownContainer = messageDiv.querySelector('.markdown-content');
-							let assistantMessage = "";
+				document.getElementById("chat-messages").appendChild(messageDiv);
+				const markdownContainer =
+					messageDiv.querySelector(".markdown-content");
+				let assistantMessage = "";
 
-							try {
-								const reader = response.body.getReader();
-								const decoder = new TextDecoder();
+				try {
+					const reader = response.body.getReader();
+					const decoder = new TextDecoder();
 
-								while (true) {
-									const { done, value } = await reader.read();
-									if (done) break;
+					while (true) {
+						const { done, value } = await reader.read();
+						if (done) break;
 
-									const chunk = decoder.decode(value);
-									const lines = chunk.split('\n\n');
+						const chunk = decoder.decode(value);
+						const lines = chunk.split("\n\n");
 
-									for (const line of lines) {
-										if (line.startsWith('data: ')) {
-											try {
-												const data = JSON.parse(line.slice(6));
+						for (const line of lines) {
+							if (line.startsWith("data: ")) {
+								try {
+									const data = JSON.parse(line.slice(6));
 
-												switch(data.type) {
-													case 'content':
-														assistantMessage += data.content;
-														markdownContainer.innerHTML = marked.parse(assistantMessage);
-														markdownContainer.querySelectorAll('pre code').forEach(block => {
-															if (!block.classList.contains('hljs')) {
-																hljs.highlightElement(block);
-															}
-														});
-														smoothScrollToBottom();
-														break;
+									switch (data.type) {
+										case "content":
+											assistantMessage += data.content;
+											markdownContainer.innerHTML =
+												marked.parse(assistantMessage);
+											markdownContainer
+												.querySelectorAll("pre code")
+												.forEach((block) => {
+													if (!block.classList.contains("hljs")) {
+														hljs.highlightElement(block);
+													}
+												});
+											smoothScrollToBottom();
+											break;
 
-													case 'error':
-														markdownContainer.innerHTML = `<div class="text-red-400">Error: ${data.content}</div>`;
-														break;
+										case "error":
+											markdownContainer.innerHTML = `<div class="text-red-400">Error: ${data.content}</div>`;
+											break;
 
-													case 'done':
-														// Final formatting pass
-														markdownContainer.innerHTML = marked.parse(assistantMessage);
-														markdownContainer.querySelectorAll('pre code').forEach(block => {
-															hljs.highlightElement(block);
-														});
-														break;
-												}
-											} catch (e) {
-												console.error('Failed to parse streaming data:', e);
-											}
-										}
+										case "done":
+											// Final formatting pass
+											markdownContainer.innerHTML =
+												marked.parse(assistantMessage);
+											markdownContainer
+												.querySelectorAll("pre code")
+												.forEach((block) => {
+													hljs.highlightElement(block);
+												});
+											break;
 									}
+								} catch (e) {
+									console.error("Failed to parse streaming data:", e);
 								}
-							} catch (error) {
-								if (error.name !== 'AbortError') {
-									console.error('Stream error:', error);
-									markdownContainer.innerHTML = `<div class="text-red-400">Error: ${error.message}</div>`;
-								}
-							} finally {
-								stopButton.classList.add('hidden');
-								smoothScrollToBottom();
 							}
 						}
+					}
+				} catch (error) {
+					if (error.name !== "AbortError") {
+						console.error("Stream error:", error);
+						markdownContainer.innerHTML = `<div class="text-red-400">Error: ${error.message}</div>`;
+					}
+				} finally {
+					stopButton.classList.add("hidden");
+					smoothScrollToBottom();
+				}
+			}
 
-						// Function to append user message
-						function appendUserMessage(content) {
-							const messagesDiv = document.getElementById("chat-messages");
+			// Function to append user message
+			function appendUserMessage(content, fileName = null) {
+				const messagesDiv = document.getElementById("chat-messages");
+				const placeholder = messagesDiv.querySelector(
+					".flex.flex-col.items-center.justify-center"
+				);
+				if (placeholder) placeholder.remove();
 
-							// Remove empty placeholder if present
-							const placeholder = messagesDiv.querySelector('.flex.flex-col.items-center.justify-center');
-							if (placeholder) placeholder.remove();
+				const messageDiv = document.createElement("div");
+				messageDiv.className = "message-enter px-4 md:px-6 py-6";
 
-							const messageDiv = document.createElement("div");
-							messageDiv.className = "message-enter px-4 md:px-6 py-6";
+				const messageContent = fileName
+				? `${content}\n[Uploaded file: ${fileName}]`
+				: content;
 
-							messageDiv.innerHTML = `
+				messageDiv.innerHTML = `
 								<div class="chat-container flex gap-4 md:gap-6">
 									<div class="flex-shrink-0 w-7 h-7">
 										<div class="w-7 h-7 rounded-sm bg-[#5436DA] flex items-center justify-center text-white text-xs font-semibold">
@@ -853,83 +904,88 @@
 										</div>
 									</div>
 									<div class="flex-1 overflow-x-auto min-w-0">
-										<p class="whitespace-pre-wrap">${content}</p>
+										<p class="whitespace-pre-wrap">${messageContent}</p>
 									</div>
 								</div>
 							`;
 
-							messagesDiv.appendChild(messageDiv);
-							smoothScrollToBottom();
+				messagesDiv.appendChild(messageDiv);
+				smoothScrollToBottom();
+			}
+
+			// Form submission
+			form.addEventListener("submit", async function (e) {
+				e.preventDefault();
+				const promptText = textarea.value.trim();
+				const fileData = fileInput.files[0];
+
+				if (!promptText && !fileData) return;
+
+				// Append user message
+				appendUserMessage(promptText, fileData?.name);
+
+				// Clear input
+				textarea.value = "";
+				adjustTextareaHeight();
+				if (fileData) clearFileSelection();
+
+				// Show typing indicator and stop button
+				createTypingIndicator();
+				stopButton.classList.remove("hidden");
+
+				// Create abort controller for this request
+				abortController = new AbortController();
+
+				try {
+					const formData = new FormData();
+					formData.append("prompt", promptText);
+					formData.append(
+						"csrfmiddlewaretoken",
+						document.querySelector("[name=csrfmiddlewaretoken]").value
+					);
+					if (fileData) formData.append("file", fileData);
+
+					if (isNewChat) {
+						console.log("Creating new chat...");
+						// Create new chat first
+						const createResponse = await fetch("{% url 'create_chat' %}", {
+							method: "POST",
+							body: formData,
+							headers: {
+								"X-CSRFToken":
+									document.querySelector("[name=csrfmiddlewaretoken]").value,
+							},
+							signal: abortController.signal,
+						});
+
+						if (!createResponse.ok) {
+							throw new Error("Failed to create chat");
 						}
 
-						// Form submission
-						form.addEventListener("submit", async function(e) {
-							e.preventDefault();
-							const promptText = textarea.value.trim();
-							const fileData = fileInput.files[0];
+						const data = await createResponse.json();
+						if (!data.success) {
+							throw new Error(data.error || "Failed to create chat");
+						}
 
-							if (!promptText && !fileData) return;
+						// Update URL with real chat ID
+						window.history.pushState({}, "", data.redirect_url);
+						currentChatId = data.chat_id;
+						isNewChat = false;
 
-							// Append user message
-							appendUserMessage(promptText);
+						// Update mobile header title if it exists
+						const mobileHeader = document.querySelector(".md\\:hidden h1");
+						if (mobileHeader && data.title) {
+							mobileHeader.textContent = data.title;
+						}
 
-							// Clear input
-							textarea.value = '';
-							adjustTextareaHeight();
-							if (fileData) clearFileSelection();
-
-							// Show typing indicator and stop button
-							createTypingIndicator();
-							stopButton.classList.remove("hidden");
-
-							// Create abort controller for this request
-							abortController = new AbortController();
-
-							try {
-								const formData = new FormData();
-								formData.append('prompt', promptText);
-								formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
-								if (fileData) formData.append('file', fileData);
-
-								if (isNewChat) {
-									console.log("Creating new chat...");
-									// Create new chat first
-									const createResponse = await fetch("{% url 'create_chat' %}", {
-										method: "POST",
-										body: formData,
-										headers: {
-											'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-										},
-										signal: abortController.signal
-									});
-
-									if (!createResponse.ok) {
-										throw new Error('Failed to create chat');
-									}
-
-									const data = await createResponse.json();
-									if (!data.success) {
-										throw new Error(data.error || 'Failed to create chat');
-									}
-
-									// Update URL with real chat ID
-									window.history.pushState({}, '', data.redirect_url);
-									currentChatId = data.chat_id;
-									isNewChat = false;
-
-									// Update mobile header title if it exists
-									const mobileHeader = document.querySelector('.md\\:hidden h1');
-									if (mobileHeader && data.title) {
-										mobileHeader.textContent = data.title;
-									}
-
-									 // Add the new chat to the sidebar without refreshing
-									const chatsList = document.getElementById('chats-list');
-									// Replace the newChatElement creation code in your form submission handler
-			const newChatElement = document.createElement('div');
-			newChatElement.className = 'flex items-center justify-between p-2 rounded bg-gray-700/40 transition-colors group text-sm';
-			newChatElement.dataset.chatId = data.chat_id;
-			newChatElement.innerHTML = `
+						// Add the new chat to the sidebar without refreshing
+						const chatsList = document.getElementById("chats-list");
+						// Replace the newChatElement creation code in your form submission handler
+						const newChatElement = document.createElement("div");
+						newChatElement.className =
+							"flex items-center justify-between p-2 rounded bg-gray-700/40 transition-colors group text-sm";
+						newChatElement.dataset.chatId = data.chat_id;
+						newChatElement.innerHTML = `
 			    <div class="flex-1 truncate chat-title-container cursor-pointer" ondblclick="startEditing(this)">
 			        <div class="text-sm text-gray-200 truncate">${data.title}</div>
 			    </div>
@@ -951,42 +1007,43 @@
 			    </div>
 			`;
 
-									// Add the new chat at the top of the list
-									if (chatsList.firstChild) {
-										chatsList.insertBefore(newChatElement, chatsList.firstChild);
-									} else {
-										chatsList.appendChild(newChatElement);
-									}
+						// Add the new chat at the top of the list
+						if (chatsList.firstChild) {
+							chatsList.insertBefore(newChatElement, chatsList.firstChild);
+						} else {
+							chatsList.appendChild(newChatElement);
+						}
 
-									// Attach delete event listener to the new chat's delete button
-									const deleteButton = newChatElement.querySelector('.delete-chat-btn');
-									deleteButton.addEventListener('click', async (e) => {
-										e.preventDefault();
-										e.stopPropagation();
-										// ... existing delete chat logic ...
-									});
-								}
+						// Attach delete event listener to the new chat's delete button
+						const deleteButton =
+							newChatElement.querySelector(".delete-chat-btn");
+						deleteButton.addEventListener("click", async (e) => {
+							e.preventDefault();
+							e.stopPropagation();
+							// ... existing delete chat logic ...
+						});
+					}
 
-								// Stream the response
-								const streamResponse = await fetch(`/chat/${currentChatId}/stream/`, {
-									method: "POST",
-									body: formData,
-									headers: {
-										'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-									},
-									signal: abortController.signal
-								});
+					// Stream the response
+					const streamResponse = await fetch(`/chat/${currentChatId}/stream/`, {
+						method: "POST",
+						body: formData,
+						headers: {
+							"X-CSRFToken":
+								document.querySelector("[name=csrfmiddlewaretoken]").value,
+						},
+						signal: abortController.signal,
+					});
 
-								await handleStreamResponse(streamResponse);
-
-							} catch (error) {
-								console.error('Error:', error);
-								removeTypingIndicator();
-								if (error.name !== 'AbortError') {
-									// Create error message
-									const messageDiv = document.createElement('div');
-									messageDiv.className = 'message-enter bg-[#444654] px-4 md:px-6 py-6';
-									messageDiv.innerHTML = `
+					await handleStreamResponse(streamResponse);
+				} catch (error) {
+					console.error("Error:", error);
+					removeTypingIndicator();
+					if (error.name !== "AbortError") {
+						// Create error message
+						const messageDiv = document.createElement("div");
+						messageDiv.className = "message-enter bg-[#444654] px-4 md:px-6 py-6";
+						messageDiv.innerHTML = `
 										<div class="chat-container flex gap-4 md:gap-6">
 											<div class="flex-shrink-0 w-7 h-7">
 												<div class="w-7 h-7 rounded-sm bg-[#11A27F] flex items-center justify-center text-white">
@@ -1000,190 +1057,195 @@
 											</div>
 										</div>
 										`;
-									document.getElementById('chat-messages').appendChild(messageDiv);
-								}
-								stopButton.classList.add("hidden");
-							}
+						document.getElementById("chat-messages").appendChild(messageDiv);
+					}
+					stopButton.classList.add("hidden");
+				}
+			});
+
+			// Stop button
+			stopButton.addEventListener("click", () => {
+				if (abortController) {
+					abortController.abort();
+					stopButton.classList.add("hidden");
+					removeTypingIndicator();
+					appendMessage("assistant", `_Response stopped by user._`);
+				}
+			});
+
+			// Delete chat
+			document.querySelectorAll(".delete-chat-btn").forEach((button) => {
+				button.addEventListener("click", async (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+
+					const chatId = button.dataset.chatId;
+					if (!confirm("Are you sure you want to delete this chat?")) return;
+
+					try {
+						const response = await fetch(`/chat/${chatId}/delete/`, {
+							method: "POST",
+							headers: {
+								"X-CSRFToken":
+									document.querySelector("[name=csrfmiddlewaretoken]").value,
+							},
 						});
 
-						// Stop button
-						stopButton.addEventListener("click", () => {
-							if (abortController) {
-								abortController.abort();
-								stopButton.classList.add("hidden");
-								removeTypingIndicator();
-								appendMessage('assistant', `_Response stopped by user._`);
-							}
-						});
+						if (!response.ok) throw new Error("Failed to delete chat");
 
-						// Clear chat
-						document.getElementById("clear-chat").addEventListener("click", async () => {
-							if (!confirm("Are you sure you want to clear this conversation?")) return;
+						const chatElement = button.closest("[data-chat-id]");
+						if (chatElement) chatElement.remove();
 
-							try {
-								if (currentChatId && currentChatId !== "new") {
-									const response = await fetch(`/chat/${currentChatId}/clear/`, {
-										method: "POST",
-										headers: {
-											"X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
-										}
-									});
-
-									if (!response.ok) throw new Error("Failed to clear chat");
-								}
-
-								document.getElementById("chat-messages").innerHTML = `
-									<div class="flex flex-col items-center justify-center h-[calc(100vh-200px)]">
-										<svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-gray-400 mb-2">
-											<path d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-10.5V21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-										</svg>
-										<p class="text-gray-400 text-sm">How can I help you today?</p>
-									</div>
-								`;
-							} catch (error) {
-								console.error("Error clearing chat:", error);
-								alert("There was an error clearing the chat. Please try again.");
-							}
-						});
-
-						// Delete chat
-						document.querySelectorAll(".delete-chat-btn").forEach((button) => {
-							button.addEventListener("click", async (e) => {
-								e.preventDefault();
-								e.stopPropagation();
-
-								const chatId = button.dataset.chatId;
-								if (!confirm("Are you sure you want to delete this chat?")) return;
-
-								try {
-									const response = await fetch(`/chat/${chatId}/delete/`, {
-										method: "POST",
-										headers: {
-											"X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
-										}
-									});
-
-									if (!response.ok) throw new Error("Failed to delete chat");
-
-									const chatElement = button.closest("[data-chat-id]");
-									if (chatElement) chatElement.remove();
-
-									if (chatId === currentChatId) {
-										window.location.href = "{% url 'new_chat' %}";
-									}
-								} catch (error) {
-									console.error("Error deleting chat:", error);
-									alert("An error occurred when trying to delete the chat. Please refresh the page.");
-								}
-							});
-						});
-
-						// Edit chat title functionality
-						function startEditing(container) {
-							const titleDiv = container.querySelector('div');
-							const currentTitle = titleDiv.textContent.trim();
-							const chatId = container.closest('[data-chat-id]').dataset.chatId;
-
-							const input = document.createElement('input');
-							input.type = 'text';
-							input.value = currentTitle;
-							input.className = 'w-full bg-gray-700/70 text-sm rounded px-2 py-1 text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400';
-
-							// Replace title with input
-							container.innerHTML = '';
-							container.appendChild(input);
-							input.focus();
-							input.select();
-
-							// Handle input events
-							input.addEventListener('blur', () => finishEditing(container, input, currentTitle, chatId));
-							input.addEventListener('keydown', (e) => {
-								if (e.key === 'Enter') {
-									e.preventDefault();
-									input.blur();
-								} else if (e.key === 'Escape') {
-									restoreTitle(container, currentTitle);
-								}
-							});
+						if (chatId === currentChatId) {
+							window.location.href = "{% url 'new_chat' %}";
 						}
+					} catch (error) {
+						console.error("Error deleting chat:", error);
+						alert(
+							"An error occurred when trying to delete the chat. Please refresh the page."
+						);
+					}
+				});
+			});
 
-						async function finishEditing(container, input, originalTitle, chatId) {
-							const newTitle = input.value.trim();
-							if (!newTitle || newTitle === originalTitle) {
-								restoreTitle(container, originalTitle);
-								return;
+			// Edit chat title functionality
+			function startEditing(container) {
+				const titleDiv = container.querySelector("div");
+				const currentTitle = titleDiv.textContent.trim();
+				const chatId = container.closest("[data-chat-id]").dataset.chatId;
 
-							}
+				const input = document.createElement("input");
+				input.type = "text";
+				input.value = currentTitle;
+				input.className =
+					"w-full bg-gray-700/70 text-sm rounded px-2 py-1 text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400";
 
-							try {
-								const response = await fetch(`/chat/${chatId}/update-title/`, {
-									method: 'POST',
-									headers: {
-										'Content-Type': 'application/json',
-										'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-									},
-									body: JSON.stringify({ title: newTitle })
-								});
+				// Replace title with input
+				container.innerHTML = "";
+				container.appendChild(input);
+				input.focus();
+				input.select();
 
-								if (!response.ok) throw new Error('Failed to update title');
+				// Handle input events
+				input.addEventListener("blur", () =>
+					finishEditing(container, input, currentTitle, chatId)
+				);
+				input.addEventListener("keydown", (e) => {
+					if (e.key === "Enter") {
+						e.preventDefault();
+						input.blur();
+					} else if (e.key === "Escape") {
+						restoreTitle(container, currentTitle);
+					}
+				});
+			}
 
-								restoreTitle(container, newTitle);
+			async function finishEditing(container, input, originalTitle, chatId) {
+				const newTitle = input.value.trim();
+				if (!newTitle || newTitle === originalTitle) {
+					restoreTitle(container, originalTitle);
+					return;
+				}
 
-								// Update page title if this is the current chat
-								if (chatId === currentChatId) {
-									const mobileHeader = document.querySelector('.md\\:hidden h1');
-									if (mobileHeader) mobileHeader.textContent = newTitle;
-									document.title = `${newTitle} - AI Chat Interface`;
-								}
-							} catch (error) {
-								console.error('Error updating chat title:', error);
-								restoreTitle(container, originalTitle);
-								alert('Failed to update chat title. Please try again.');
-							}
+				try {
+					const response = await fetch(`/chat/${chatId}/update-title/`, {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+							"X-CSRFToken":
+								document.querySelector("[name=csrfmiddlewaretoken]").value,
+						},
+						body: JSON.stringify({ title: newTitle }),
+					});
+
+					if (!response.ok) throw new Error("Failed to update title");
+
+					restoreTitle(container, newTitle);
+
+					// Update page title if this is the current chat
+					if (chatId === currentChatId) {
+						const mobileHeader = document.querySelector(".md\\:hidden h1");
+						if (mobileHeader) mobileHeader.textContent = newTitle;
+						document.title = `${newTitle} - AI Chat Interface`;
+					}
+				} catch (error) {
+					console.error("Error updating chat title:", error);
+					restoreTitle(container, originalTitle);
+					alert("Failed to update chat title. Please try again.");
+				}
+			}
+
+			function restoreTitle(container, title) {
+				container.innerHTML = `<div class="text-sm text-gray-200 truncate">${title}</div>`;
+			}
+
+			// Initialize
+			document.addEventListener("DOMContentLoaded", function () {
+				document.querySelectorAll(".markdown-content").forEach((container) => {
+					const rawContent = container.textContent.trim();
+
+					// Only apply markdown parsing if the content actually contains markdown
+					if (rawContent && !/^```/.test(rawContent)) {
+						container.classList.remove('hljs');
+					}
+
+					if (rawContent && !container.querySelector("pre, p, ul, ol, blockquote")) {
+						try {
+							container.innerHTML = marked.parse(rawContent);
+							// Only highlight code blocks
+							container.querySelectorAll('pre code').forEach((block) => {
+								hljs.highlightElement(block);
+							});
+						} catch (e) {
+							console.error("Failed to parse markdown:", e);
+							// Fallback to plain text
+							container.textContent = rawContent;
 						}
+					}
+				});
 
-						function restoreTitle(container, title) {
-							container.innerHTML = `<div class="text-sm text-gray-200 truncate">${title}</div>`;
+				// Rest of your initialization code...
+				// Process existing markdown content
+				document.querySelectorAll(".markdown-content").forEach((container) => {
+					// First, ensure markdown is properly rendered
+					const rawContent = container.textContent;
+					if (
+						rawContent &&
+						!container.querySelector("pre, p, ul, ol, blockquote")
+					) {
+						try {
+							container.innerHTML = marked.parse(rawContent);
+						} catch (e) {
+							console.error("Failed to parse markdown:", e);
 						}
+					}
 
-						// Initialize
-						document.addEventListener("DOMContentLoaded", function() {
-							// Process existing markdown content
-							document.querySelectorAll('.markdown-content').forEach((container) => {
-								// First, ensure markdown is properly rendered
-								const rawContent = container.textContent;
-								if (rawContent && !container.querySelector('pre, p, ul, ol, blockquote')) {
-									try {
-										container.innerHTML = marked.parse(rawContent);
-									} catch (e) {
-										console.error("Failed to parse markdown:", e);
-									}
-								}
+					// Then highlight code blocks
+					container.querySelectorAll("pre code").forEach((block) => {
+						hljs.highlightElement(block);
+					});
+				});
 
-								// Then highlight code blocks
-								container.querySelectorAll('pre code').forEach((block) => {
-									hljs.highlightElement(block);
-								});
-							});
+				// Apply styles to message containers
+				document.querySelectorAll(".message-enter").forEach((msg) => {
+					// Ensure proper backgrounds
+					if (
+						msg.querySelector(".w-7.h-7.rounded-sm.bg-\\[\\#11A27F\\]")
+					) {
+						msg.classList.add("bg-transparent");
+					}
+				});
 
-							// Apply styles to message containers
-							document.querySelectorAll('.message-enter').forEach((msg) => {
-								// Ensure proper backgrounds
-								if (msg.querySelector('.w-7.h-7.rounded-sm.bg-\\[\\#11A27F\\]')) {
-									msg.classList.add('bg-[#444654]');
-								}
-							});
+				window.scrollTo({
+					top: document.body.scrollHeight,
+					behavior: "auto",
+				});
 
-							window.scrollTo({
-								top: document.body.scrollHeight,
-								behavior: 'auto'
-							});
-
-							// Set up auto-resizing for textarea
-							if (textarea.value) {
-								adjustTextareaHeight();
-							}
-						});
+				// Set up auto-resizing for textarea
+				if (textarea.value) {
+					adjustTextareaHeight();
+				}
+			});
 		</script>
 	</body>
 </html>
