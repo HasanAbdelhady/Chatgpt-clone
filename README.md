@@ -30,7 +30,7 @@ A fully-functional LLM Interface built with Django and Groq API. This project se
 1. Clone the repository:
 
 ```bash
-git clone [https://github.com/yourusername/chatgpt-clone.git](https://github.com/HasanAbdelhady/Chatgpt-clone.git)
+git clone https://github.com/HasanAbdelhady/Chatgpt-clone.git
 ```
 
 2. Create and activate virtual environment:
