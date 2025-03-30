@@ -1,6 +1,10 @@
 # Modern ChatGPT Clone
 
 A fully-functional ChatGPT-style web application built with Django and Groq API. This project serves as a starting point for developers looking to create their own AI chat applications with customized features.
+![image](https://github.com/user-attachments/assets/5c055d39-b310-439d-a045-4c5d1b28a6ce)
+![image](https://github.com/user-attachments/assets/ee46681b-f059-4600-91c3-5d21a7dabd88)
+![image](https://github.com/user-attachments/assets/006ac2cb-732e-45ce-8cd7-4fbbb67632fe)
+![image](https://github.com/user-attachments/assets/42698085-bd06-48b2-af9d-07d2858e972d)
 
 ## Features
 
