@@ -95,7 +95,7 @@ Visit `http://127.0.0.1:8000` to see the application in action!
 
 ## Contributing
 
-The current version still needs some improvement, so feel free to suggest improvements
+The current version still needs some improvement, so feel free to make your own version.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/SomeFeature`)
