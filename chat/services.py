@@ -1,6 +1,5 @@
 from .models import Message
 from .ai_models import AIModelManager
-from .preference_service import PreferenceService
 from django.core.files.storage import default_storage
 import os
 import PyPDF2
@@ -64,7 +63,6 @@ class ChatService:
         chat.save()
 
     def generate_response(self, user):
-        preferences = PreferenceService.get_system_prompt(user)
-        messages = [{"role": "user", "content": preferences}]
+        messages = [{"role": "user", "content": user}]
         response = self.ai_manager.get_chat_completion(messages)
         return response

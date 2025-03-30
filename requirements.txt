@@ -1,5 +1,6 @@
-replicate
-python-dotenv
-django
-groq
-PyPDF2
+Django == 5.1.7
+djangorestframework==3.15.2
+djangorestframework_simplejwt==5.3.1
+groq==0.20.0
+PyPDF2==3.0.1
+python-dotenv==1.1.0

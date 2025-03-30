@@ -17,23 +17,11 @@ import io
 import os
 import json
 from .services import ChatService
-from .preference_service import PreferenceService
 chat_service = ChatService()
 
 # Detailed system prompt for the "Learning How to Learn" expert.
 SYSTEM_PROMPT = (
-    "You are LearningMaster, an expert in the principles of 'Learning How to Learn'. "
-    "You possess extensive knowledge of effective learning techniques, cognitive psychology, memory retention strategies, "
-    "and resource recommendations across a wide range of subjects. Your goal is to help students study any subject by providing "
-    "clear, personalized, and effective study strategies that take into account their unique learning preferences. "
-    "Before answering any questions, if the student's preferred learning style (e.g., visual, auditory, kinesthetic, reading/writing) "
-    "is not clearly stated in their prompt, ask a clarifying question (or questions) to get that information, and then end your message "
-    "with the marker <<END_OF_QUESTION>>. Do not provide any further explanation until the student provides their learning style. "
-    "In addition to providing personalized study strategies, you excel at creating interactive quizzes that cover "
-    "the most vital parts of a lecture. When asked, generate multiple-choice quizzes with 4 answer options per question. "
-    "Each quiz should be output as a complete HTML snippet that includes inline CSS and JavaScript so that the quiz is interactive—"
-    "allowing the user to select an answer and then see whether they chose correctly. "
-    "Once you have the necessary information, provide a full, detailed answer and include recommendations for high-quality, freely available resources."
+    "You are Spark, the intelligent AI Assistant"
 )
 
 # Initialize the Groq client.
@@ -171,10 +159,6 @@ class ChatStreamView(View):
 def create_chat(request):
     if request.method == "POST":
 
-        new_prompt = PreferenceService.get_system_prompt(request.user)
-        request.session['system_prompt'] = new_prompt
-        print(new_prompt)
-
         message = request.POST.get("prompt", "").strip()
 
         if not message:
@@ -214,57 +198,6 @@ def create_chat(request):
         'error': 'Invalid request method'
     }, status=405)
 
-
-# chat/views.py (updated quiz_view)
-
-
-@login_required
-def quiz_view(request):
-    if request.method == "POST":
-        lecture_text = request.POST.get("lecture_text", "").strip()
-        if not lecture_text:
-            return HttpResponse("Lecture text is required to generate a quiz.", status=400)
-
-        prefs = request.user.get_learning_preferences()
-
-        # Build a dedicated prompt for quiz generation with user preferences
-        quiz_prompt = (
-            "You are LearningMaster, an expert in 'Learning How to Learn' and a skilled quizzer. "
-            f"The student prefers {prefs['learning_style']} learning styles and {prefs['study_time']} study sessions. "
-            "Generate an interactive multiple-choice quiz based on the following lecture text. "
-            f"{'Include visual elements and diagrams where possible.' if prefs['learning_style'] == 'visual' else ''} "
-            "Each question should have 4 possible answers, with only one correct answer. "
-            "Output the quiz as a complete HTML snippet that includes inline CSS and JavaScript. "
-            "The HTML should display the quiz questions, provide radio button options for each, "
-            "and include a 'Check Answer' button that reveals whether the selected answer is correct or not. "
-            "Lecture text:\n\n" + lecture_text
-        )
-
-        try:
-            completion = groq_client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=[{"role": "system", "content": quiz_prompt}],
-                temperature=1,
-                max_completion_tokens=4096,
-                top_p=1,
-                stream=False,
-                stop=None,
-            )
-        except Exception as e:
-            return HttpResponse(f"Error calling Groq API: {e}", status=500)
-
-        # Unescape HTML entities in the output and mark it as safe.
-        raw_quiz = completion.choices[0].message.content
-        unescaped_quiz = html.unescape(raw_quiz)
-        quiz_html = mark_safe(unescaped_quiz)
-
-        context = {
-            "quiz_html": quiz_html,
-            "lecture_text": lecture_text,
-        }
-        return render(request, "chat/quiz.html", context)
-
-    return render(request, "chat/quiz.html")
 
 
 @login_required

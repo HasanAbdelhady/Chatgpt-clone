@@ -1,7 +1,7 @@
-from .models import CustomUser, Interest
+from .models import CustomUser
 from django.contrib.auth.forms import UserChangeForm
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, SetPasswordForm
 from .models import CustomUser
 
 
@@ -36,45 +36,12 @@ class CustomUserCreationForm(UserCreationForm):
         })
     )
 
-    learning_style_visual = forms.IntegerField(initial=0, required=False)
-    learning_style_auditory = forms.IntegerField(initial=0, required=False)
-    learning_style_kinesthetic = forms.IntegerField(initial=0, required=False)
-    learning_style_reading = forms.IntegerField(initial=0, required=False)
-
-    custom_interests = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={
-            'class': 'w-full p-2 border border-gray-300 rounded-lg',
-            'placeholder': 'Enter additional interests...'
-        })
-    )
-
-    preferred_study_time = forms.ChoiceField(
-        choices=CustomUser.STUDY_TIME_CHOICES,
-        widget=forms.Select(
-            attrs={'class': 'w-full p-2 border border-gray-300 rounded-lg'})
-    )
-    quiz_preference = forms.ChoiceField(
-        choices=CustomUser.QUIZ_PREFERENCE_CHOICES,
-        widget=forms.Select(
-            attrs={'class': 'w-full p-2 border border-gray-300 rounded-lg'})
-    )
-
     class Meta:
         model = CustomUser
         fields = (
-            'username', 'email', 'profile_image', 'learning_style_visual', 'learning_style_auditory',
-            'learning_style_kinesthetic', 'learning_style_reading',
-            'custom_interests', 'preferred_study_time', 'quiz_preference'
+            'username', 'email', 'profile_image'
         )
-    def clean(self):
-        # Override clean to specifically remove interests from cleaned_data
-        # This ensures that any 'interests' data in POST won't be validated against form fields
-        cleaned_data = super().clean()
-        if 'interests' in self.data:
-            # Don't validate 'interests' field - we'll handle it manually in the view
-            pass
-        return cleaned_data
+
     def clean_username(self):
         username = self.cleaned_data['username']
         if CustomUser.objects.filter(username=username).exists():
@@ -99,41 +66,14 @@ class CustomUserChangeForm(UserChangeForm):
         })
     )
 
-    learning_style_visual = forms.IntegerField(initial=0, required=False)
-    learning_style_auditory = forms.IntegerField(initial=0, required=False)
-    learning_style_kinesthetic = forms.IntegerField(initial=0, required=False)
-    learning_style_reading = forms.IntegerField(initial=0, required=False)
-
-    custom_interests = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={
-            'class': 'w-full p-2 border border-gray-300 rounded-lg',
-            'placeholder': 'Enter additional interests...'
-        })
-    )
-
-    preferred_study_time = forms.ChoiceField(
-        choices=CustomUser.STUDY_TIME_CHOICES,
-        widget=forms.Select(
-            attrs={'class': 'w-full p-2 border border-gray-300 rounded-lg'})
-    )
-    quiz_preference = forms.ChoiceField(
-        choices=CustomUser.QUIZ_PREFERENCE_CHOICES,
-        widget=forms.Select(
-            attrs={'class': 'w-full p-2 border border-gray-300 rounded-lg'})
-    )
-
-
 
     class Meta:
         model = CustomUser
         fields = (
-            'email', 'profile_image', 'learning_style_visual', 'learning_style_auditory',
-            'learning_style_kinesthetic', 'learning_style_reading', 'interests',
-            'custom_interests', 'preferred_study_time', 'quiz_preference'
+            'email', 'profile_image'
         )
 
-class PasswordChangeForm(forms.Form):
+class PasswordChangeForm(SetPasswordForm):
     old_password = forms.CharField(
         widget=forms.PasswordInput(attrs={
             'class': 'w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-100'
@@ -150,12 +90,12 @@ class PasswordChangeForm(forms.Form):
         })
     )
 
-    def clean(self):
-        cleaned_data = super().clean()
-        new_password1 = cleaned_data.get('new_password1')
-        new_password2 = cleaned_data.get('new_password2')
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(user, *args, **kwargs)
 
-        if new_password1 and new_password2 and new_password1 != new_password2:
-            raise forms.ValidationError(
-                "The two password fields didn't match.")
-        return cleaned_data
+    def clean_old_password(self):
+        old_password = self.cleaned_data.get('old_password')
+        if not self.user.check_password(old_password):
+            raise forms.ValidationError('Your old password was entered incorrectly.')
+        return old_password

@@ -1,3 +1,4 @@
+#You'll only need this in case you wanted to use a front-end framework (to get proper api endpoints)
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password

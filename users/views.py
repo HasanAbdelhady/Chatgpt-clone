@@ -1,4 +1,3 @@
-import json
 from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
@@ -14,19 +13,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.views import LogoutView as DjangoLogoutView
 from django.urls import reverse_lazy
-from .models import Interest, CustomUser, UserInterest
 from django.db import transaction
 
 User = get_user_model()
-
-SUBJECT_CHOICES = [
-    "Machine Learning", "Deep Learning", "Natural Language Processing",
-    "Computer Vision", "Artificial Intelligence", "Data Science",
-    "Python Programming", "Data Structures & Algorithms", "Databases",
-    "Web Development", "Cloud Computing", "Cybersecurity",
-    "Robotics", "Data Engineering",
-]
-
 
 class UserRegistrationView(View):
     @method_decorator(csrf_protect)
@@ -34,7 +23,7 @@ class UserRegistrationView(View):
         if request.user.is_authenticated:
             return redirect('chat')
         form = CustomUserCreationForm()
-        return render(request, 'users/register.html', {'form': form, 'interests': SUBJECT_CHOICES})
+        return render(request, 'users/register.html', {'form': form})
 
     @method_decorator(csrf_protect)
     def post(self, request):
@@ -47,46 +36,9 @@ class UserRegistrationView(View):
         if form.is_valid():
             with transaction.atomic():
                 user = form.save(commit=False)
-                print("Form is valid")                
                 
-                # Update learning preferences from form data
-                learning_styles = {
-                    'visual': request.POST.get('learning_style_visual') == "1",
-                    'auditory': request.POST.get('learning_style_auditory') == "1",
-                    'kinesthetic': request.POST.get('learning_style_kinesthetic') == "1",
-                    'reading': request.POST.get('learning_style_reading') == "1",
-                }
-                for style, value in learning_styles.items():
-                    setattr(user, f'learning_style_{style}', value)
-
-                # Update study time preference
-                study_time = request.POST.get('preferred_study_time')
-                if study_time in dict(CustomUser.STUDY_TIME_CHOICES):
-                    user.preferred_study_time = study_time
-
-                # Update quiz preference
-                quiz_pref = request.POST.get('quiz_preference')
-                if quiz_pref and quiz_pref.isdigit():
-                    quiz_pref_int = int(quiz_pref)
-                    if quiz_pref_int in dict(CustomUser.QUIZ_PREFERENCE_CHOICES):
-                        user.quiz_preference = quiz_pref_int
-
-                print("Updating user attributes")
-                # Use update() to save the user attributes without causing a unique constraint issue
                 user.save()
-                # Now handle the interests
-                interest_names = request.POST.getlist('interests')
-                print(f"Interest names: {interest_names}")
-                
-                # Create user interests
-                for interest_name in interest_names:
-                    # Try to find existing interest or create new one
-                    interest, created = Interest.objects.get_or_create(name=interest_name)
-                    # Create the user-interest relationship
-                    UserInterest.objects.create(user=user, interest=interest)
-                    print(f"Added interest: {interest}")
-                
-                # Now log in the user
+
                 login(request, user)
                 
                 messages.success(
@@ -97,9 +49,7 @@ class UserRegistrationView(View):
                 for error in errors:
                     messages.error(request, f'{field}: {error}')
         
-        interests = list(Interest.objects.values('id', 'name'))
-        print(f"Available interests: {interests}")
-        return render(request, 'users/register.html', {'form': form, 'interests': interests})
+        return render(request, 'users/register.html', {'form': form})
 
 class UserLoginView(View):
     def get(self, request):
@@ -109,17 +59,10 @@ class UserLoginView(View):
 class UserProfileView(LoginRequiredMixin, View):
     def get(self, request):
         user_form = CustomUserChangeForm(instance=request.user)
-        password_form = PasswordChangeForm()
-        interests = Interest.objects.all()
-        user_interests = request.user.interests.all()
+        password_form = PasswordChangeForm(user=request.user)
         context = {
             'user_form': user_form,
             'password_form': password_form,
-            'interests': interests,
-            'user_interests': user_interests,
-            'study_time_choices': CustomUser.STUDY_TIME_CHOICES,
-            'quiz_preference_choices': CustomUser.QUIZ_PREFERENCE_CHOICES,
-            'learning_style_choices': CustomUser.LEARNING_STYLE_CHOICES,
         }
         return render(request, 'users/profile.html', context)
     def handle_password_change(self, request):
@@ -143,29 +86,6 @@ class UserProfileView(LoginRequiredMixin, View):
             if user_form.is_valid():
                 user = user_form.save(commit=False)
 
-                # Update learning styles
-                learning_styles = {
-                    'visual': request.POST.get('learning_style_visual') == "1",
-                    'auditory': request.POST.get('learning_style_auditory') == "1",
-                    'kinesthetic': request.POST.get('learning_style_kinesthetic') == "1",
-                    'reading': request.POST.get('learning_style_reading') == "1",
-                }
-                for style, value in learning_styles.items():
-                    setattr(user, f'learning_style_{style}', value)
-
-                # Update study time preference
-                study_time = request.POST.get('preferred_study_time')
-                if study_time in dict(CustomUser.STUDY_TIME_CHOICES):
-                    user.preferred_study_time = study_time
-
-                # Update quiz preference
-                quiz_pref = request.POST.get('quiz_preference')
-                if quiz_pref and quiz_pref.isdigit():
-                    quiz_pref_int = int(quiz_pref)
-                    if quiz_pref_int in dict(CustomUser.QUIZ_PREFERENCE_CHOICES):
-                        user.quiz_preference = quiz_pref_int
-
-                # Save user changes
                 user.save()
 
                 messages.success(request, 'Profile updated successfully!')
@@ -174,61 +94,6 @@ class UserProfileView(LoginRequiredMixin, View):
                     for error in errors:
                         messages.error(request, f'{field}: {error}')
 
-        elif action == 'add_interest':
-            interest_name = request.POST.get('interest_name')
-            if interest_name and interest_name.strip():
-                interest_name = interest_name.strip()
-                # Try to find existing interest
-                interest, created = Interest.objects.get_or_create(name=interest_name)
-                
-                # Check if user already has this interest
-                if not UserInterest.objects.filter(user=request.user, interest=interest).exists():
-                    # Create the relationship
-                    UserInterest.objects.create(user=request.user, interest=interest)
-                    messages.success(request, f'Added interest: {interest.name}')
-                else:
-                    messages.info(request, f'You already have "{interest.name}" in your interests')
-            else:
-                messages.error(request, 'Invalid interest name')
-
-        elif action == 'remove_interest':
-            interest_id = request.POST.get('interest_id')
-            if interest_id and interest_id.isdigit():
-                try:
-                    interest = Interest.objects.get(id=int(interest_id))
-                    # Find and delete the relationship
-                    user_interest = UserInterest.objects.filter(
-                        user=request.user, 
-                        interest=interest
-                    ).first()
-                    
-                    if user_interest:
-                        user_interest.delete()
-                        messages.success(request, f'Removed interest: {interest.name}')
-                    else:
-                        messages.error(request, 'You haven\'t added this interest')
-                except Interest.DoesNotExist:
-                    messages.error(request, 'Interest not found')
-            else:
-                messages.error(request, 'Invalid interest ID')
-
-        elif action == 'add_multiple_interests':
-            interest_ids = request.POST.getlist('interest_ids[]')
-            added_count = 0
-            for interest_id in interest_ids:
-                if interest_id.isdigit():
-                    try:
-                        interest = Interest.objects.get(id=int(interest_id))
-                        # Check if user already has this interest
-                        if not UserInterest.objects.filter(user=request.user, interest=interest).exists():
-                            # Create the relationship
-                            UserInterest.objects.create(user=request.user, interest=interest)
-                            added_count += 1
-                    except Interest.DoesNotExist:
-                        continue
-            
-            if added_count > 0:
-                messages.success(request, f'Added {added_count} interests to your profile')
         elif action == "change_password":
             return self.handle_password_change(request)
 
@@ -291,80 +156,3 @@ class LogoutView(DjangoLogoutView):
     def post(self, request, *args, **kwargs):
         logout(request)
         return redirect(self.next_page)
-
-
-# @login_required
-# def get_interests(request):
-#     interests = list(Interest.objects.values('id', 'name'))
-#     return JsonResponse(interests, safe=False)
-
-
-# @login_required
-# def create_interest(request):
-#     if request.method == 'POST':
-#         try:
-#             data = json.loads(request.body)
-#             name = data.get('name', '').strip()
-#             if not name:
-#                 return JsonResponse({'error': 'Name is required'}, status=400)
-
-#             interest, created = Interest.objects.get_or_create(
-#                 name=name.lower())
-#             return JsonResponse({
-#                 'id': interest.id,
-#                 'name': interest.name
-#             })
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=500)
-#     return JsonResponse({'error': 'Method not allowed'}, status=405)
-
-
-# @login_required
-# @require_POST
-# def clear_interests(request):
-#     """Clear all interests for the currently logged in user."""
-#     try:
-#         user = request.user
-#         # Clear all interests
-#         user.interests.clear()
-#         messages.success(
-#             request, 'All interests have been successfully removed.')
-#     except Exception as e:
-#         messages.error(request, f'Error removing interests: {str(e)}')
-
-#     return redirect('profile')
-
-
-# @login_required
-# def get_interests(request):
-#     interests = list(Interest.objects.values('id', 'name'))
-#     return JsonResponse(interests, safe=False)
-
-
-# @login_required
-# def create_interest(request):
-#     if request.method == 'POST':
-#         try:
-#             data = json.loads(request.body)
-#             name = data.get('name', '').strip()
-#             if not name:
-#                 return JsonResponse({'error': 'Name is required'}, status=400)
-#             interest, created = Interest.objects.get_or_create(
-#                 name=name.lower())
-#             return JsonResponse({'id': interest.id, 'name': interest.name})
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=500)
-#     return JsonResponse({'error': 'Method not allowed'}, status=405)
-
-
-# @login_required
-# @require_POST
-# def clear_interests(request):
-#     try:
-#         user = request.user
-#         user.interests.clear()  # Clears all interests via UserInterest
-#         messages.success(
-#             request, 'All interests have been successfully removed.')
-#     except Exception as e:
-#         messages.error(request, f'Error removing interests: {str(e)}')
-#     return redirect('profile')

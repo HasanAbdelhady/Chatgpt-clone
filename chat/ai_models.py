@@ -5,7 +5,6 @@ class AIModelManager:
     def __init__(self):
         self.client = Groq()
         self.default_model = "llama3-8b-8192"
-        self.quiz_model = "llama-3.3-70b-versatile"
 
     def get_chat_completion(self, messages, stream=True, model=None, preferences=None):
         try:
@@ -22,16 +21,6 @@ class AIModelManager:
         except Exception as e:
             raise AIModelException(f"Error getting completion: {str(e)}")
 
-    def generate_quiz(self, prompt):
-        try:
-            completion = self.get_chat_completion(
-                messages=[{"role": "system", "content": prompt}],
-                stream=False,
-                model=self.quiz_model
-            )
-            return completion.choices[0].message.content
-        except Exception as e:
-            raise AIModelException(f"Error generating quiz: {str(e)}")
 
     def generate_title(self, conversation):
         try:
