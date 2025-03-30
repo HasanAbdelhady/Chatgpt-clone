@@ -30,8 +30,7 @@ A fully-functional ChatGPT-style web application built with Django and Groq API.
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/chatgpt-clone.git
-cd chatgpt-clone
+git clone [https://github.com/yourusername/chatgpt-clone.git](https://github.com/HasanAbdelhady/Chatgpt-clone.git)
 ```
 
 2. Create and activate virtual environment:
