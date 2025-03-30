@@ -16,8 +16,6 @@ A fully-functional ChatGPT-style web application built with Django and Groq API.
 - 📁 File upload and processing capabilities
 - 👤 User authentication and profile management
 - 💾 Chat history and management
-- 🔒 Secure JWT authentication
-- 📱 Mobile-friendly design
 
 ## Tech Stack
 
@@ -96,6 +94,8 @@ Visit `http://127.0.0.1:8000` to see the application in action!
 4. Update URLs in `urls.py`
 
 ## Contributing
+
+The current version still needs some improvement, so feel free to suggest improvements
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/SomeFeature`)
