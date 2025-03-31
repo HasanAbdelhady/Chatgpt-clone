@@ -49,7 +49,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Create a file and name it `.env` the root directory:
+4. Create a file and name it `.env` in the root directory:
 
 ```env
 GROQ_API_KEY=your_groq_api_key_here
