@@ -67,8 +67,8 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-6. Create a superuser (admin):
-
+6. You can create a superuser (admin) via:
+( You don't have to; you can just register from the registration page.)
 ```bash
 python manage.py createsuperuser
 ```
