@@ -49,7 +49,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Create a `.env` file in the root directory:
+4. Create a file and name it `.env` the root directory:
 
 ```env
 GROQ_API_KEY=your_groq_api_key_here
@@ -57,6 +57,8 @@ JWT_SECRET=your_jwt_secret_key_here
 JWT_ACCESS_TOKEN_EXPIRE_MINUTES=1440 (or your desired number)
 JWT_REFRESH_TOKEN_EXPIRE_MINUTES=30
 ```
+Get your GROQ API Key from here ( it's free ):
+https://console.groq.com/keys
 
 5. Run migrations:
 
