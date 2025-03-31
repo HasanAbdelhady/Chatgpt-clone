@@ -63,6 +63,7 @@ https://console.groq.com/keys
 5. Run migrations:
 
 ```bash
+python manage.py makemigrations
 python manage.py migrate
 ```
 
