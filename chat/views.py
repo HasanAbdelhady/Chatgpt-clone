@@ -19,7 +19,7 @@ import json
 from .services import ChatService
 chat_service = ChatService()
 
-# Detailed system prompt for the "Learning How to Learn" expert.
+#Your System Prompt ( Edit this to get different behaviours from the LLM )
 SYSTEM_PROMPT = (
     "You are Spark, the intelligent AI Assistant"
 )
@@ -249,8 +249,6 @@ def send_message(request, chat_id):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-
-# Add this after your existing view functions
 
 
 @login_required
