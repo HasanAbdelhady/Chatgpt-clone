@@ -99,7 +99,6 @@ class UserProfileView(LoginRequiredMixin, View):
 
         return redirect('profile')
 
-# Other views remain unchanged unless they interact with interests
 class TokenObtainPairView(APIView):
     def post(self, request):
         user = request.user
