@@ -2,7 +2,10 @@
 
 A fully-functional LLM Interface built with Django and Groq API. This project serves as a starting point for developers looking to create their own AI chat applications with customized features.
 
-https://github.com/user-attachments/assets/fdf7334d-a1d7-476c-88cc-09667d081b21
+
+https://github.com/user-attachments/assets/7d42fe6d-f2cb-41e2-b402-4eacf6d64112
+
+
 ![image](https://github.com/user-attachments/assets/c9453188-abe4-4963-ad0b-f724a0af615d)
 ![image](https://github.com/user-attachments/assets/4050c667-bbf8-4c85-92e9-35ef8fcf1e50)
 ![image](https://github.com/user-attachments/assets/5c055d39-b310-439d-a045-4c5d1b28a6ce)
